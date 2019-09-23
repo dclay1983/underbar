@@ -87,6 +87,31 @@
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
+    var result = []
+    if (typeof iterator !== "function") {iterator = _.identity};
+    var compare = function (val, tranTest) {
+      var tranVal = iterator(val);
+      return tranVal === tranTest;
+    }
+    if (isSorted) {
+      _.each(array, function (val) {
+        var tranTest = (iterator(result[result.length - 1]));
+        if(!(compare(val, tranTest))) {result.push(val)};
+      })
+    } else {
+      _.each(array, function (val) {
+        var isUniq = true;
+        _.each(result, function (test) {
+          var tranTest = iterator(test);
+          if (compare(val, tranTest)) {
+            isUniq = false;
+            return
+          }
+        });
+        if (isUniq) {result.push(val)}
+      })
+    }
+    return result;
   };
 
 
