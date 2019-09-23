@@ -170,11 +170,7 @@
     // track index if obbject
     var index = 0;
     _.each(collection, function(val) {
-      if (index === 0 && noMemo) {
-        accumulator = val
-      } else {
-        accumulator = iterator(accumulator, val);
-      }
+      accumulator = index === 0 && noMemo ? val : iterator(accumulator, val);
       index++
     })
     return accumulator;
