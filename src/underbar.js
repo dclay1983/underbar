@@ -167,7 +167,7 @@
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
     var noMemo = accumulator === undefined;
-    // track index if obbject
+    // track index if object
     var index = 0;
     _.each(collection, function(val) {
       accumulator = index === 0 && noMemo ? val : iterator(accumulator, val);
@@ -191,13 +191,28 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
+    if (typeof iterator !== "function") {iterator = _.identity};
     // TIP: Try re-using reduce() here.
+    return _.reduce(collection, function(match, item) {
+      if (!match) {
+        return false;
+      }
+      return iterator(item) ? true : false;
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
+    if (typeof iterator !== "function") {iterator = _.identity};
     // TIP: There's a very clever way to re-use every() here.
+    // ^^ Todo: find out how
+    return _.reduce(collection, function(match, item) {
+      if (match || iterator(item)) {
+        return true;
+      }
+      return false;
+    }, false);
   };
 
 
