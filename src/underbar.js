@@ -298,6 +298,28 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    // Store the initial call of the function so it is only ever
+    // called once and its argument list for comparison.
+    var funcCalls = {
+      called: [], 
+      args: []
+    }
+
+    return function() {
+      // Test if function has been called with given arguments
+      var passedArgs = Array.from(arguments);
+      var calledArgs = _.map(funcCalls.args, function (arg) {
+        return JSON.stringify(Array.from(arg));
+      })
+      var indexOfArgs = _.indexOf(calledArgs, JSON.stringify(passedArgs))
+      if (indexOfArgs === -1) {
+        // If not save a new instance of _.once(func) and the argument list
+        indexOfArgs = funcCalls.called.push(_.once(func)) - 1;
+        funcCalls.args.push(arguments);
+      }
+      return funcCalls.called[indexOfArgs].apply(funcCalls.called[indexOfArgs],
+        funcCalls.args[indexOfArgs]);
+    };
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -307,6 +329,8 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var args = Array.from(arguments).slice(2);
+    setTimeout(func, wait, ...args);
   };
 
 
