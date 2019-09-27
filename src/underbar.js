@@ -405,6 +405,18 @@
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+    var args = arguments;
+    var len = _.reduce(args, function (len, arg) {
+      return len > arg.length ? len : arg.length;
+    }, 0);
+    var result = Array(len);
+    _.each(result, function(arr, i) {
+      result[i] = []
+      _.each(args, function(x) {
+        result[i].push(x[i]);
+      })
+    })
+    return result;
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
@@ -412,11 +424,35 @@
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+    result = result || [];
+    _.each(nestedArray, function(element) {
+      if (Array.isArray(element)) {
+        _.flatten(element, result);
+      } else {
+        result.push(element)
+      }
+    })
+    return result;
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+    var args = Array.from(arguments);
+    var result = _.uniq(_.flatten(args))
+    for (let i = 0; i < result.length; i++) {
+      var found = true;
+      _.each(args, function(arg) {
+        if (found) {
+          found = _.contains(arg, result[i]);
+        }
+      })
+      if (!found) {
+        result.splice(i, 1)
+        --i;
+      };
+    }
+    return result;
   };
 
   // Take the difference between one array and a number of other arrays.
