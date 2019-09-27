@@ -458,6 +458,23 @@
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
+    array = array.slice()
+    for (let i = 0; i < array.length; i++) {
+      var val = array[i];
+      var found = false;
+      for (let x = 1; x < arguments.length; x++) {
+        for (let y = 0; y < arguments[x].length; y++) {
+          if(val === arguments[x][y]) {
+            found = true;
+            array.splice(i, 1)
+            i--;
+            break;
+          }
+        }
+        if (found) break;
+      }
+    }
+    return array;
   };
 
   // Returns a function, that, when invoked, will only be triggered at most once
