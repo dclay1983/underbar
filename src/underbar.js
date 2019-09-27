@@ -483,5 +483,25 @@
   //
   // Note: This is difficult! It may take a while to implement.
   _.throttle = function(func, wait) {
+    var callFunc = function(callArgs) {
+      last = new Date().getTime();
+      calledTwice = false;
+      func.apply(func, callArgs);
+    }
+    var last = 0;
+    var calledTwice = false;
+    return function () {
+      if (calledTwice) {
+        return;
+      }
+      var now = new Date().getTime();
+      var timeFromCall = now - last;
+      if (timeFromCall < wait) {
+        calledTwice = true;
+        setTimeout(callFunc, (wait + 1 - timeFromCall), Array.from(arguments));
+      } else {
+        callFunc(Array.from(arguments));        
+      }
+    }
   };
 }());
