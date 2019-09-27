@@ -191,7 +191,7 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
-    if (typeof iterator !== "function") {iterator = _.identity};
+    iterator = iterator || _.identity;
     // TIP: Try re-using reduce() here.
     return _.reduce(collection, function(match, item) {
       if (!match) {
@@ -204,15 +204,12 @@
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
-    if (typeof iterator !== "function") {iterator = _.identity};
+    iterator = iterator || _.identity;
     // TIP: There's a very clever way to re-use every() here.
     // ^^ Todo: find out how
-    return _.reduce(collection, function(match, item) {
-      if (match || iterator(item)) {
-        return true;
-      }
-      return false;
-    }, false);
+    return !_.every(collection, function(item) {
+        return !iterator(item);
+    });
   };
 
 
@@ -300,18 +297,11 @@
   _.memoize = function(func) {
     // Store the initial call of the function so it is only ever
     // called once and its argument list for comparison.
-    var funcCalls = {
-      called: [], 
-      args: []
-    }
-
+    var funcCalls = {called: [], args: []}
     return function() {
       // Test if function has been called with given arguments
-      var passedArgs = Array.from(arguments);
-      var calledArgs = _.map(funcCalls.args, function (arg) {
-        return JSON.stringify(Array.from(arg));
-      })
-      var indexOfArgs = _.indexOf(calledArgs, JSON.stringify(passedArgs))
+      var calledArgs = _.map(funcCalls.args, function (arg) {return JSON.stringify(arg)})
+      var indexOfArgs = _.indexOf(calledArgs, JSON.stringify(arguments))
       if (indexOfArgs === -1) {
         // If not save a new instance of _.once(func) and the argument list
         indexOfArgs = funcCalls.called.push(_.once(func)) - 1;
@@ -345,11 +335,10 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
-    var tmp = array.slice();
-    var shuffled = []
-    while (tmp.length > 0) {
-      var rnd = Math.random() * tmp.length;
-      shuffled.push(tmp.splice(rnd, 1)[0]);
+    array = array.slice();
+    var shuffled = [];
+    while (array.length > 0) {
+      shuffled.push(array.splice(Math.random() * array.length, 1)[0]);
     }
     return shuffled;
   };
@@ -380,6 +369,34 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+    // work with a copy not a reference
+    var col = collection.slice();
+    var len = collection.length;
+    while (len >= 1) {
+      var newlen = 0;
+      if (typeof iterator === "string") {
+        for (let i = 1; i < len; i++) {
+          var a = col[i - 1][iterator] !== undefined ? col[i - 1][iterator] : Infinity
+          var b = col[i][iterator] !== undefined ? col[i][iterator] : Infinity
+          if (a > b) {
+            [col[i - 1], col[i]] = [col[i], col[i-1]];
+            newlen = i;
+          }
+        }
+      } else {
+        for (let i = 1; i < len; i++) {
+          var a = iterator(col[i - 1]) !== undefined ? iterator(col[i - 1]) : Infinity
+          var b = iterator(col[i]) !== undefined ? iterator(col[i]) : Infinity
+          if (a > b) {
+            [col[i - 1], col[i]] = [col[i], col[i-1]];
+            newlen = i;
+          }
+        }
+      }
+      len = newlen;
+    }
+    return col;
+
   };
 
   // Zip together two or more arrays with elements of the same index
